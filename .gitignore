@@ -1,1 +1,13 @@
+.ddev
 .idea
+
+bin
+Build
+Configuration/Development
+Data
+Packages
+Web
+
+composer.lock
+flow
+flow.bat

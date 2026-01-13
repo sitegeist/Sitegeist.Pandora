@@ -15,6 +15,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
+        "neos/flow": "^8.3.0",
         "mcp/sdk": "^0.3.0"
     },
     "require-dev": {
