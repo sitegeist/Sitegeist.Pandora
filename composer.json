@@ -1,0 +1,45 @@
+{
+    "name": "sitegeist/pandora",
+    "description": "A PHP MCP Server integration for the Neos Flow framework",
+    "config": {
+        "vendor-dir": "Packages/Libraries",
+        "bin-dir": "bin",
+        "platform": {
+            "php": "8.2"
+        },
+        "allow-plugins": {
+            "neos/composer-plugin": true,
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "mcp/sdk": "^0.3.0"
+    },
+    "require-dev": {
+        "neos/buildessentials": "^8.3",
+        "mikey179/vfsstream": "^1.6",
+        "phpunit/phpunit": "^11.0",
+        "symfony/css-selector": "~2.0",
+        "neos/behat": "^8.3",
+        "editorconfig-checker/editorconfig-checker": "^10.0",
+        "squizlabs/php_codesniffer": "^3.4",
+        "phpstan/phpstan": "^2.0"
+    },
+    "scripts": {
+        "post-update-cmd": "Neos\\Flow\\Composer\\InstallerScripts::postUpdateAndInstall",
+        "post-install-cmd": "Neos\\Flow\\Composer\\InstallerScripts::postUpdateAndInstall",
+        "post-package-update": "Neos\\Flow\\Composer\\InstallerScripts::postPackageUpdateAndInstall",
+        "post-package-install": "Neos\\Flow\\Composer\\InstallerScripts::postPackageUpdateAndInstall",
+
+        "lint:phpcs": "phpcs --colors --standard=PSR12 Classes Tests",
+        "lint:phpstan": "phpstan analyse",
+        "lint": [
+            "@lint:phpcs",
+            "@lint:phpstan"
+        ],
+
+        "test": "echo \"No tests yet.\""
+    }
+}
