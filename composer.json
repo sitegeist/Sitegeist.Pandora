@@ -1,6 +1,7 @@
 {
     "name": "sitegeist/pandora",
     "description": "A PHP MCP Server integration for the Neos Flow framework",
+    "type": "neos-package",
     "config": {
         "vendor-dir": "Packages/Libraries",
         "bin-dir": "bin",
