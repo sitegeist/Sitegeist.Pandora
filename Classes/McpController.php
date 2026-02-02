@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Sitegeist\Pandora;
 
+use Mcp\Server\Session\SessionStoreInterface;
 use Mcp\Server;
+use Mcp\Server\Builder as ServerBuilder;
 use Mcp\Server\Transport\StreamableHttpTransport;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\ActionResponse;
@@ -16,11 +18,16 @@ use Psr\Log\LoggerInterface;
 abstract class McpController implements ControllerInterface
 {
     public function __construct(
-        private readonly LoggerInterface $logger,
+        protected readonly LoggerInterface $logger,
+        protected readonly SessionStoreInterface $sessionStore,
     ) {
     }
 
-    final public function processRequest(ActionRequest $request, ActionResponse $response): void
+    /**
+     * @internal
+     * do not override; cannot be final because of AOP
+     */
+    public function processRequest(ActionRequest $request, ActionResponse $response): void
     {
         $transport = new StreamableHttpTransport(
             request: $request->getHttpRequest(),
@@ -29,13 +36,14 @@ abstract class McpController implements ControllerInterface
             logger: $this->logger,
         );
 
-        $response->setContent(
-            $this->getServer()->run($transport),
-        );
+        $serverBuilder = Server::builder()
+            ->setLogger($this->logger)
+            ->setSession($this->sessionStore);
+        $this->populateServer($serverBuilder);
+        $result = $serverBuilder->build()->run($transport);
+        $response->replaceHttpResponse($result);
+        $request->setDispatched(true);
     }
 
-    /**
-     * @see Server::builder()
-     */
-    abstract protected function getServer(): Server;
+    abstract protected function populateServer(ServerBuilder $serverBuilder): void;
 }

@@ -1,0 +1,19 @@
+Sitegeist\Pandora\Infrastructure\FlowSessionStore:
+  properties:
+    metaDataCache:
+      object:
+        factoryObjectName: Neos\Flow\Cache\CacheManager
+        factoryMethodName: getCache
+        arguments:
+          1:
+            value: MCP_Session_MetaData
+    storageCache:
+      object:
+        factoryObjectName: Neos\Flow\Cache\CacheManager
+        factoryMethodName: getCache
+        arguments:
+          1:
+            value: MCP_Session_Storage
+
+Mcp\Server\Session\SessionStoreInterface:
+  className: 'Sitegeist\Pandora\Infrastructure\FlowSessionStore'

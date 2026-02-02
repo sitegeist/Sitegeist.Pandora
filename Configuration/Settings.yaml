@@ -1,0 +1,4 @@
+Sitegeist:
+  Pandora:
+    session:
+      inactivityTimeout: 3600

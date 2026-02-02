@@ -1,0 +1,6 @@
+MCP_Session_MetaData:
+  backend: Neos\Cache\Backend\FileBackend
+  persistent: true
+MCP_Session_Storage:
+  backend: Neos\Cache\Backend\FileBackend
+  persistent: true
