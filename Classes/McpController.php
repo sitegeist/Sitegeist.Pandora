@@ -14,7 +14,6 @@ use Neos\Flow\Mvc\Controller\ControllerInterface;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Http\Factories\ResponseFactory;
 use Neos\Http\Factories\StreamFactory;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 abstract class McpController implements ControllerInterface
@@ -53,4 +52,14 @@ abstract class McpController implements ControllerInterface
     }
 
     abstract protected function populateServer(ServerBuilder $serverBuilder): void;
+
+    /**
+     * @template T of object
+     * @param class-string<T> $fqn
+     * @return T
+     */
+    public function getObject(string $fqn): object
+    {
+        return $this->objectManager->get($fqn);
+    }
 }
