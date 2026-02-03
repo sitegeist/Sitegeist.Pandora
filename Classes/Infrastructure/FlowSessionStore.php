@@ -142,6 +142,9 @@ final class FlowSessionStore implements SessionStoreInterface
         return $deleted;
     }
 
+    /**
+     * @return array<string,mixed>|null
+     */
     private function getSessionInfo(Uuid $id): ?array
     {
         $sessionIdentifier = $id->toRfc4122();
@@ -158,6 +161,9 @@ final class FlowSessionStore implements SessionStoreInterface
         return $sessionInfo;
     }
 
+    /**
+     * @param array<string,mixed> $sessionInfo
+     */
     private function touch(Uuid $id, array $sessionInfo): void
     {
         $sessionIdentifier = $id->toRfc4122();
@@ -171,6 +177,9 @@ final class FlowSessionStore implements SessionStoreInterface
         );
     }
 
+    /**
+     * @param array<string,mixed> $sessionInfo
+     */
     private function isExpired(array $sessionInfo): bool
     {
         if ($this->inactivityTimeout === 0) {

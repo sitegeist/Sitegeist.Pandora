@@ -11,8 +11,10 @@ use Mcp\Server\Transport\StreamableHttpTransport;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\ActionResponse;
 use Neos\Flow\Mvc\Controller\ControllerInterface;
+use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Http\Factories\ResponseFactory;
 use Neos\Http\Factories\StreamFactory;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 abstract class McpController implements ControllerInterface
@@ -20,6 +22,7 @@ abstract class McpController implements ControllerInterface
     public function __construct(
         protected readonly LoggerInterface $logger,
         protected readonly SessionStoreInterface $sessionStore,
+        protected readonly ObjectManagerInterface $objectManager,
     ) {
     }
 
@@ -29,6 +32,9 @@ abstract class McpController implements ControllerInterface
      */
     public function processRequest(ActionRequest $request, ActionResponse $response): void
     {
+        if ($request->getHttpRequest()->getBody()->isSeekable()) {
+            $request->getHttpRequest()->getBody()->rewind();
+        }
         $transport = new StreamableHttpTransport(
             request: $request->getHttpRequest(),
             responseFactory: new ResponseFactory(),
@@ -37,6 +43,7 @@ abstract class McpController implements ControllerInterface
         );
 
         $serverBuilder = Server::builder()
+            ->setContainer($this->objectManager)
             ->setLogger($this->logger)
             ->setSession($this->sessionStore);
         $this->populateServer($serverBuilder);
