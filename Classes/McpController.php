@@ -15,6 +15,8 @@ use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Http\Factories\ResponseFactory;
 use Neos\Http\Factories\StreamFactory;
 use Psr\Log\LoggerInterface;
+use Sitegeist\Pandora\Domain\McpServerPopulator;
+use Sitegeist\Pandora\Domain\ElementIsMissing;
 
 abstract class McpController implements ControllerInterface
 {
@@ -58,8 +60,17 @@ abstract class McpController implements ControllerInterface
      * @param class-string<T> $fqn
      * @return T
      */
-    public function getObject(string $fqn): object
+    final protected function getObject(string $fqn): object
     {
         return $this->objectManager->get($fqn);
+    }
+
+    /**
+     * @param class-string $className
+     * @throws ElementIsMissing
+     */
+    final protected function addAttributedElement(ServerBuilder $serverBuilder, string $className, string $methodName): void
+    {
+        McpServerPopulator::addElementFromReflection($serverBuilder, $className, $methodName);
     }
 }
