@@ -62,7 +62,10 @@ abstract class McpController implements ControllerInterface
      */
     final protected function getObject(string $fqn): object
     {
-        return $this->objectManager->get($fqn);
+        /** @var T $object */
+        $object = $this->objectManager->get($fqn);
+
+        return $object;
     }
 
     /**
