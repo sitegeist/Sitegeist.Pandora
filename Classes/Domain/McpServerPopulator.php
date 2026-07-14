@@ -29,6 +29,7 @@ final class McpServerPopulator
             throw ElementIsMissing::becauseMethodDoesNotExist($className, $methodName);
         }
 
+        $elementResolved = false;
         foreach ($methodReflector->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();
             $builder = match (get_class($attributeInstance)) {
@@ -71,10 +72,12 @@ final class McpServerPopulator
                 default => null,
             };
             if ($builder !== null) {
-                return;
+                $elementResolved = true;
             }
         }
 
-        throw ElementIsMissing::becauseMethodIsNotAttributed($className, $methodName);
+        if (!$elementResolved) {
+            throw ElementIsMissing::becauseMethodIsNotAttributed($className, $methodName);
+        }
     }
 }
