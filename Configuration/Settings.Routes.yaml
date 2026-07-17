@@ -1,0 +1,6 @@
+Neos:
+  Flow:
+    mvc:
+      routes:
+        'Sitegeist.Pandora':
+          position: 'before Neos.Neos'

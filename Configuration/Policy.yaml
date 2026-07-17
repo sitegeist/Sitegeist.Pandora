@@ -1,0 +1,4 @@
+privilegeTargets:
+  'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+    'Sitegeist.Pandora:MCP':
+      matcher: 'method(Sitegeist\Pandora\Controller\McpController->processRequest())'

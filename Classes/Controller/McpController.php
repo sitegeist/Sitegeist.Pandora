@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\Pandora;
+namespace Sitegeist\Pandora\Controller;
 
 use Mcp\Server\Session\SessionStoreInterface;
-use Mcp\Server;
-use Mcp\Server\Builder as ServerBuilder;
 use Mcp\Server\Transport\StreamableHttpTransport;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\ActionResponse;
@@ -15,22 +13,18 @@ use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Http\Factories\ResponseFactory;
 use Neos\Http\Factories\StreamFactory;
 use Psr\Log\LoggerInterface;
-use Sitegeist\Pandora\Domain\McpServerPopulator;
-use Sitegeist\Pandora\Domain\ElementIsMissing;
+use Sitegeist\Pandora\McpServerBuilderFactory;
 
-abstract class McpController implements ControllerInterface
+class McpController implements ControllerInterface
 {
     public function __construct(
         protected readonly LoggerInterface $logger,
         protected readonly SessionStoreInterface $sessionStore,
         protected readonly ObjectManagerInterface $objectManager,
+        protected readonly McpServerBuilderFactory $serverBuilderFactory,
     ) {
     }
 
-    /**
-     * @internal
-     * do not override; cannot be final because of AOP
-     */
     public function processRequest(ActionRequest $request, ActionResponse $response): void
     {
         if ($request->getHttpRequest()->getBody()->isSeekable()) {
@@ -43,37 +37,9 @@ abstract class McpController implements ControllerInterface
             logger: $this->logger,
         );
 
-        $serverBuilder = Server::builder()
-            ->setContainer($this->objectManager)
-            ->setLogger($this->logger)
-            ->setSession($this->sessionStore);
-        $this->populateServer($serverBuilder);
+        $serverBuilder = $this->serverBuilderFactory->create();
         $result = $serverBuilder->build()->run($transport);
         $response->replaceHttpResponse($result);
         $request->setDispatched(true);
-    }
-
-    abstract protected function populateServer(ServerBuilder $serverBuilder): void;
-
-    /**
-     * @template T of object
-     * @param class-string<T> $fqn
-     * @return T
-     */
-    final protected function getObject(string $fqn): object
-    {
-        /** @var T $object */
-        $object = $this->objectManager->get($fqn);
-
-        return $object;
-    }
-
-    /**
-     * @param class-string $className
-     * @throws ElementIsMissing
-     */
-    final protected function addAttributedElement(ServerBuilder $serverBuilder, string $className, string $methodName): void
-    {
-        McpServerPopulator::addElementFromReflection($serverBuilder, $className, $methodName);
     }
 }

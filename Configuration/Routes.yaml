@@ -1,0 +1,8 @@
+-
+  name:  'MCP'
+  uriPattern: 'mcp'
+  defaults:
+    '@package':    'Sitegeist.Pandora'
+    '@controller': 'Mcp'
+    '@action':     'query'
+  httpMethods: ['GET', 'POST', 'OPTIONS']
