@@ -2,3 +2,10 @@ Sitegeist:
   Pandora:
     session:
       inactivityTimeout: 3600
+    capabilities:
+      # a dictionary of paths relative to Flow's root path.
+      # can be used to enable an external non-Flow library via
+      # 'Packages/Libraries/some-library/src': true
+      # or disable an otherwise auto-included Flow package
+      # 'DistributionPackages/Acme.Capabilities/Classes': false
+      discoveryPaths: {}

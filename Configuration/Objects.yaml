@@ -17,3 +17,15 @@ Sitegeist\Pandora\Infrastructure\FlowSessionStore:
 
 Mcp\Server\Session\SessionStoreInterface:
   className: 'Sitegeist\Pandora\Infrastructure\FlowSessionStore'
+
+Sitegeist\Pandora\McpServerBuilderFactory:
+  arguments:
+    1:
+      setting: 'Sitegeist.Pandora.capabilities.discoveryPaths'
+    2:
+      object:
+        factoryObjectName: Neos\Flow\Cache\CacheManager
+        factoryMethodName: getSimpleCache
+        arguments:
+          1:
+            value: MCP_Capabilities
