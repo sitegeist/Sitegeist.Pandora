@@ -2,3 +2,18 @@ privilegeTargets:
   'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
     'Sitegeist.Pandora:MCP':
       matcher: 'method(Sitegeist\Pandora\Controller\McpController->processRequest())'
+
+# One privilege target per discovered MCP capability is available for roles below. Target
+# identifiers follow "Sitegeist.Pandora:Capability.<Type>.<name>" - list them with
+# "./flow pandora:capability:list".
+#
+# Deny-by-default: a capability is only exposed by a server once a role of the authenticated user
+# GRANTs it. Grant them as ordinary role privileges, e.g.:
+#
+# roles:
+#   'Neos.Neos:Editor':
+#     privileges:
+#       - privilegeTarget: 'Sitegeist.Pandora:Capability.Tool.find-children'
+#         permission: GRANT
+#       - privilegeTarget: 'Sitegeist.Pandora:Capability.Tool.find-descendants'
+#         permission: GRANT

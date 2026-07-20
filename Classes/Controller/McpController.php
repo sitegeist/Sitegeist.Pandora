@@ -14,6 +14,7 @@ use Neos\Http\Factories\ResponseFactory;
 use Neos\Http\Factories\StreamFactory;
 use Psr\Log\LoggerInterface;
 use Sitegeist\Pandora\McpServerBuilderFactory;
+use Sitegeist\Pandora\Security\CapabilityAuthorization;
 
 class McpController implements ControllerInterface
 {
@@ -22,6 +23,7 @@ class McpController implements ControllerInterface
         protected readonly SessionStoreInterface $sessionStore,
         protected readonly ObjectManagerInterface $objectManager,
         protected readonly McpServerBuilderFactory $serverBuilderFactory,
+        protected readonly CapabilityAuthorization $capabilityAuthorization,
     ) {
     }
 
@@ -37,8 +39,12 @@ class McpController implements ControllerInterface
             logger: $this->logger,
         );
 
-        $serverBuilder = $this->serverBuilderFactory->create();
-        $result = $serverBuilder->build()->run($transport);
+        // Build the full server (from the cached, role-independent capability set), then prune
+        // its registry to the capabilities the authenticated user is granted before serving.
+        $builtServer = $this->serverBuilderFactory->buildServer();
+        $this->capabilityAuthorization->restrictToGranted($builtServer->registry);
+
+        $result = $builtServer->server->run($transport);
         $response->replaceHttpResponse($result);
         $request->setDispatched(true);
     }

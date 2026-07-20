@@ -4,6 +4,8 @@ MCP_Session_MetaData:
 MCP_Session_Storage:
   backend: Neos\Cache\Backend\FileBackend
   persistent: true
+# Holds the discovered MCP capabilities, role-independent (role filtering happens afterwards, in
+# memory). Not persistent, so a regular cache:flush rebuilds it when capabilities change in code.
 MCP_Capabilities:
-  backend: Neos\Cache\Backend\NullBackend
+  backend: Neos\Cache\Backend\FileBackend
   persistent: false
