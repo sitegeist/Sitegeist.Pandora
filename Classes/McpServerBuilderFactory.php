@@ -16,6 +16,7 @@ use Neos\Flow\Security\Policy\Role;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Sitegeist\Pandora\Capability\CapabilityEnumerator;
+use Sitegeist\Pandora\Infrastructure\CapabilityHandlerContainer;
 use Sitegeist\Pandora\Security\CapabilityAuthorization;
 
 #[Flow\Scope('singleton')]
@@ -34,6 +35,7 @@ final class McpServerBuilderFactory
         private readonly SessionStoreInterface $sessionStore,
         private readonly ObjectManagerInterface $objectManager,
         private readonly CapabilityAuthorization $capabilityAuthorization,
+        private readonly CapabilityHandlerContainer $capabilityHandlerContainer,
     ) {
     }
 
@@ -43,7 +45,10 @@ final class McpServerBuilderFactory
 
         return Server::builder()
             ->setDiscovery(FLOW_PATH_ROOT, $scanDirs, $this->excludeDirs, $this->cache)
-            ->setContainer($this->objectManager)
+            // Not the ObjectManager itself: capability classes are #[Flow\Proxy(false)] (the SDK's
+            // discoverer requires it) and Flow cannot inject their constructor dependencies without
+            // a proxy - see CapabilityHandlerContainer.
+            ->setContainer($this->capabilityHandlerContainer)
             ->setLogger($this->logger)
             ->setSession($this->sessionStore);
     }
