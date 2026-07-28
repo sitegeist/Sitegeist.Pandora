@@ -2,6 +2,11 @@ Sitegeist:
   Pandora:
     session:
       inactivityTimeout: 3600
+    http:
+      allowedHosts:
+        - 'localhost'
+        - '127.0.0.1'
+        - '[::1]'
     capabilities:
       # Discovery scans the real autoload roots (PSR-0/PSR-4) of every FLOW package. Non-Flow
       # packages (plain composer libraries) are NOT scanned by default: the SDK's discoverer
