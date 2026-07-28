@@ -27,21 +27,29 @@ final readonly class CapabilityDescriptors implements \IteratorAggregate, \Count
 
     /**
      * Reads the capabilities present in an already loaded MCP registry.
+     *
+     * The {@see Page::references} only carry the capability schema objects, not their handlers, so
+     * the providing package is resolved via the per-capability handler obtained from the registry's
+     * single-element getters.
      */
-    public static function createFromRegistry(RegistryInterface $registry): self
+    public static function createFromRegistry(RegistryInterface $registry, PackageKeyResolver $packageKeyResolver): self
     {
         $items = [];
         foreach ($registry->getTools()->references as $tool) {
-            $items[] = new CapabilityDescriptor(CapabilityType::Tool, $tool->name, $tool->name);
+            $packageKey = $packageKeyResolver->resolveForHandler($registry->getTool($tool->name)->handler);
+            $items[] = new CapabilityDescriptor(CapabilityType::Tool, $packageKey, $tool->name, $tool->name);
         }
         foreach ($registry->getResources()->references as $resource) {
-            $items[] = new CapabilityDescriptor(CapabilityType::Resource, $resource->name, $resource->uri);
+            $packageKey = $packageKeyResolver->resolveForHandler($registry->getResource($resource->uri, false)->handler);
+            $items[] = new CapabilityDescriptor(CapabilityType::Resource, $packageKey, $resource->name, $resource->uri);
         }
         foreach ($registry->getResourceTemplates()->references as $resourceTemplate) {
-            $items[] = new CapabilityDescriptor(CapabilityType::ResourceTemplate, $resourceTemplate->name, $resourceTemplate->uriTemplate);
+            $packageKey = $packageKeyResolver->resolveForHandler($registry->getResourceTemplate($resourceTemplate->uriTemplate)->handler);
+            $items[] = new CapabilityDescriptor(CapabilityType::ResourceTemplate, $packageKey, $resourceTemplate->name, $resourceTemplate->uriTemplate);
         }
         foreach ($registry->getPrompts()->references as $prompt) {
-            $items[] = new CapabilityDescriptor(CapabilityType::Prompt, $prompt->name, $prompt->name);
+            $packageKey = $packageKeyResolver->resolveForHandler($registry->getPrompt($prompt->name)->handler);
+            $items[] = new CapabilityDescriptor(CapabilityType::Prompt, $packageKey, $prompt->name, $prompt->name);
         }
 
         return new self(...$items);

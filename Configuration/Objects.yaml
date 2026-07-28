@@ -23,6 +23,8 @@ Sitegeist\Pandora\McpServerBuilderFactory:
     1:
       setting: 'Sitegeist.Pandora.capabilities.discoveryPaths'
     2:
+      setting: 'Sitegeist.Pandora.capabilities.excludeDirs'
+    3:
       object:
         factoryObjectName: Neos\Flow\Cache\CacheManager
         factoryMethodName: getSimpleCache

@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Sitegeist\Pandora\Command;
 
 use Neos\Flow\Cli\CommandController;
+use Neos\Flow\Package\PackageManager;
 use Neos\Flow\Security\Exception\NoSuchRoleException;
 use Neos\Flow\Security\Policy\PolicyService;
 use Neos\Flow\Security\Policy\Role;
 use Sitegeist\Pandora\Capability\CapabilityDescriptors;
+use Sitegeist\Pandora\Capability\PackageKeyResolver;
 use Sitegeist\Pandora\McpServerBuilderFactory;
-use Sitegeist\Pandora\Security\CapabilityAuthorization;
 use Sitegeist\Pandora\Security\McpCapabilityPrivilege;
 
 /**
@@ -18,12 +19,15 @@ use Sitegeist\Pandora\Security\McpCapabilityPrivilege;
  */
 class CapabilityCommandController extends CommandController
 {
+    private readonly PackageKeyResolver $packageKeyResolver;
+
     public function __construct(
-        private readonly CapabilityAuthorization $capabilityAuthorization,
         private readonly McpServerBuilderFactory $serverBuilderFactory,
         private readonly PolicyService $policyService,
+        PackageManager $packageManager,
     ) {
         parent::__construct();
+        $this->packageKeyResolver = new PackageKeyResolver($packageManager);
     }
 
     /**
@@ -43,24 +47,30 @@ class CapabilityCommandController extends CommandController
             $this->quit(1);
         }
 
-        $registry = $this->serverBuilderFactory->buildServer()->registry;
-        $allCapabilities = CapabilityDescriptors::createFromRegistry($registry);
+        $allCapabilities = CapabilityDescriptors::createFromRegistry(
+            $this->serverBuilderFactory->buildInsecureServer()->registry,
+            $this->packageKeyResolver
+        );
 
-        // Apply the real filter, then re-read the registry: the survivors are what the server exposes.
-        $this->capabilityAuthorization->restrictToGrantedForRoles($registry, $roles);
-        $grantedKeys = array_fill_keys(CapabilityDescriptors::createFromRegistry($registry)->getMatchers(), true);
+        // A fresh build pruned to the simulated roles: its survivors are what the server exposes.
+        $grantedRegistry = $this->serverBuilderFactory->buildServerForRoles($roles)->registry;
+        $grantedKeys = array_fill_keys(
+            CapabilityDescriptors::createFromRegistry($grantedRegistry, $this->packageKeyResolver)->getMatchers(),
+            true
+        );
 
         $rows = [];
         foreach ($allCapabilities as $capability) {
             $rows[] = [
                 $capability->type->value,
+                $capability->packageKey,
                 $capability->name,
                 $capability->getPrivilegeTargetIdentifier(),
                 isset($grantedKeys[$capability->getMatcher()]) ? '<success>exposed</success>' : 'hidden',
             ];
         }
 
-        $this->output->outputTable($rows, ['Type', 'Name', 'Privilege target', 'For these roles']);
+        $this->output->outputTable($rows, ['Type', 'Package', 'Name', 'Privilege target', 'For these roles']);
         $this->outputLine();
         $this->outputLine('Simulated roles: <info>%s</info>', [implode(', ', array_map(
             static fn (Role $r) => $r->getIdentifier(),

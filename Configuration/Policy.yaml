@@ -3,9 +3,11 @@ privilegeTargets:
     'Sitegeist.Pandora:MCP':
       matcher: 'method(Sitegeist\Pandora\Controller\McpController->processRequest())'
 
-# One privilege target per discovered MCP capability is available for roles below. Target
-# identifiers follow "Sitegeist.Pandora:Capability.<Type>.<name>" - list them with
-# "./flow pandora:capability:list".
+# One privilege target per discovered MCP capability is available for roles below. Each target is
+# owned by the package that PROVIDES the capability, so identifiers follow
+# "<ProvidingPackageKey>:Capability.<Type>.<name>" (e.g. "Sitegeist.Pandora:Capability.Tool.find-children"
+# for a capability shipped by Sitegeist.Pandora itself, "Acme.Blog:Capability.Tool.search" for one
+# shipped by Acme.Blog) - list them all with "./flow pandora:capability:list".
 #
 # Deny-by-default: a capability is only exposed by a server once a role of the authenticated user
 # GRANTs it. Grant them as ordinary role privileges, e.g.:

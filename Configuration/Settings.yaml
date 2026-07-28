@@ -3,9 +3,21 @@ Sitegeist:
     session:
       inactivityTimeout: 3600
     capabilities:
-      # a dictionary of paths relative to Flow's root path.
-      # can be used to enable an external non-Flow library via
+      # Discovery scans the real autoload roots (PSR-0/PSR-4) of every FLOW package. Non-Flow
+      # packages (plain composer libraries) are NOT scanned by default: the SDK's discoverer
+      # include()s every file it finds, and library files that guard against absent optional peer
+      # dependencies throw at include time, which aborts the entire discovery run. Opt those in
+      # deliberately below. This dictionary of paths relative to Flow's root path overrides the
+      # default per path:
+      # enable an extra path (a library's autoload root, or a whole package tree) via
       # 'Packages/Libraries/some-library/src': true
-      # or disable an otherwise auto-included Flow package
+      # or disable an otherwise auto-included autoload root via
       # 'DistributionPackages/Acme.Capabilities/Classes': false
       discoveryPaths: {}
+      # Directory names/relative sub-paths pruned from every scan root (Symfony Finder ->exclude()).
+      # Empty by default: a path only enters the scan scope deliberately, so nothing should silently
+      # drop out of it again. Useful when a whole package tree is opted in via discoveryPaths above,
+      # where sample and test code would otherwise be scanned along with it - in that case something
+      # along the lines of ['examples', 'Examples', 'tests', 'Tests', 'Fixtures'] is a sensible start.
+      # Note that only directories INSIDE a scan root are matched, never the root itself.
+      excludeDirs: []

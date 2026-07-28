@@ -6,10 +6,12 @@ namespace Sitegeist\Pandora\Security;
 
 use Mcp\Capability\RegistryInterface;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Package\PackageManager;
 use Neos\Flow\Security\Authorization\PrivilegeManagerInterface;
 use Neos\Flow\Security\Policy\Role;
 use Sitegeist\Pandora\Capability\CapabilityDescriptor;
 use Sitegeist\Pandora\Capability\CapabilityDescriptors;
+use Sitegeist\Pandora\Capability\PackageKeyResolver;
 
 /**
  * Removes MCP capabilities the current user is not granted access to from a built server's registry,
@@ -18,9 +20,13 @@ use Sitegeist\Pandora\Capability\CapabilityDescriptors;
 #[Flow\Scope('singleton')]
 final class CapabilityAuthorization
 {
+    private readonly PackageKeyResolver $packageKeyResolver;
+
     public function __construct(
         private readonly PrivilegeManagerInterface $privilegeManager,
+        PackageManager $packageManager,
     ) {
+        $this->packageKeyResolver = new PackageKeyResolver($packageManager);
     }
 
     /**
@@ -28,7 +34,7 @@ final class CapabilityAuthorization
      */
     public function restrictToGranted(RegistryInterface $registry): void
     {
-        CapabilityDescriptors::createFromRegistry($registry)
+        CapabilityDescriptors::createFromRegistry($registry, $this->packageKeyResolver)
             ->filter(fn (CapabilityDescriptor $descriptor): bool => !$this->privilegeManager->isGranted(
                 McpCapabilityPrivilege::class,
                 McpCapabilityPrivilegeSubject::createFromDescriptor($descriptor)
@@ -45,7 +51,7 @@ final class CapabilityAuthorization
      */
     public function restrictToGrantedForRoles(RegistryInterface $registry, array $roles): void
     {
-        CapabilityDescriptors::createFromRegistry($registry)
+        CapabilityDescriptors::createFromRegistry($registry, $this->packageKeyResolver)
             ->filter(fn (CapabilityDescriptor $descriptor): bool => !$this->privilegeManager->isGrantedForRoles(
                 $roles,
                 McpCapabilityPrivilege::class,
