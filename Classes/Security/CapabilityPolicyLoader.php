@@ -65,11 +65,19 @@ final class CapabilityPolicyLoader implements LoaderInterface
             }
 
             $packageKeyResolver = new PackageKeyResolver($this->packageManager);
-            foreach (CapabilityEnumerator::discover($scanDirs, $packageKeyResolver, $excludeDirs, $cache) as $capability) {
-                $configuration['privilegeTargets'][McpCapabilityPrivilege::class][$capability->getPrivilegeTargetIdentifier()] ??= [
-                    'matcher' => $capability->getMatcher(),
-                    'label' => $capability->getLabel(),
-                ];
+            foreach (
+                CapabilityEnumerator::discover(
+                    $scanDirs,
+                    $packageKeyResolver,
+                    $excludeDirs,
+                    $cache
+                ) as $capability
+            ) {
+                $configuration['privilegeTargets'][McpCapabilityPrivilege::class]
+                    [$capability->getPrivilegeTargetIdentifier()] ??= [
+                        'matcher' => $capability->getMatcher(),
+                        'label' => $capability->getLabel(),
+                    ];
             }
         } catch (\Throwable) {
             // Discovery must never break policy loading; on failure capabilities simply stay ungrantable.

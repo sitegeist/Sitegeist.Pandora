@@ -93,9 +93,15 @@ final class Package extends BasePackage
                 }
 
                 if ($step->getIdentifier() === 'neos.flow:cachemanagement') {
+                    /** @var CacheManager $cacheManager */
                     $cacheManager = $bootstrap->getEarlyInstance(CacheManager::class);
                     $listener = new FileMonitorListener($cacheManager);
-                    $dispatcher->connect(FileMonitor::class, 'filesHaveChanged', $listener, 'flushCapabilitiesCacheOnFileChanges');
+                    $dispatcher->connect(
+                        FileMonitor::class,
+                        'filesHaveChanged',
+                        $listener,
+                        'flushCapabilitiesCacheOnFileChanges',
+                    );
                 }
             });
         }

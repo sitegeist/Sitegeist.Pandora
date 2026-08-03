@@ -26,3 +26,8 @@ Sitegeist:
       # along the lines of ['examples', 'Examples', 'tests', 'Tests', 'Fixtures'] is a sensible start.
       # Note that only directories INSIDE a scan root are matched, never the root itself.
       excludeDirs: []
+    # Instructions are assigned via providers (@see InstructionsProvider) per role, e.g.
+    # instructions:
+    #   'Neos.Flow:Everybody':
+    #     general: 'Acme\Site\Instruction\GeneralInstructionsProvider'
+    instructions: {}

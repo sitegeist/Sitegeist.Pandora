@@ -10,13 +10,13 @@ use Mcp\Server;
 use Mcp\Server\Builder as ServerBuilder;
 use Mcp\Server\Session\SessionStoreInterface;
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Flow\Package\PackageManager;
 use Neos\Flow\Security\Policy\Role;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Sitegeist\Pandora\Capability\CapabilityEnumerator;
 use Sitegeist\Pandora\Infrastructure\CapabilityHandlerContainer;
+use Sitegeist\Pandora\Instruction\InstructionsRegistry;
 use Sitegeist\Pandora\Security\CapabilityAuthorization;
 
 #[Flow\Scope('singleton')]
@@ -33,9 +33,9 @@ final class McpServerBuilderFactory
         private readonly PackageManager $packageManager,
         private readonly LoggerInterface $logger,
         private readonly SessionStoreInterface $sessionStore,
-        private readonly ObjectManagerInterface $objectManager,
         private readonly CapabilityAuthorization $capabilityAuthorization,
         private readonly CapabilityHandlerContainer $capabilityHandlerContainer,
+        private readonly InstructionsRegistry $instructionsRegistry,
     ) {
     }
 
@@ -63,7 +63,7 @@ final class McpServerBuilderFactory
      */
     public function buildServer(): BuiltServer
     {
-        $builtServer = $this->buildInsecureServer();
+        $builtServer = $this->buildInsecureServer(instructions: $this->instructionsRegistry->findForCurrentAccount());
         $this->capabilityAuthorization->restrictToGranted($builtServer->registry);
 
         return $builtServer;
@@ -77,7 +77,14 @@ final class McpServerBuilderFactory
      */
     public function buildServerForRoles(array $roles): BuiltServer
     {
-        $builtServer = $this->buildInsecureServer();
+        $builtServer = $this->buildInsecureServer(
+            instructions: $this->instructionsRegistry->findForRoles(
+                array_map(
+                    fn (Role $role): string => $role->getIdentifier(),
+                    $roles,
+                )
+            )
+        );
         $this->capabilityAuthorization->restrictToGrantedForRoles($builtServer->registry, $roles);
 
         return $builtServer;
@@ -89,11 +96,12 @@ final class McpServerBuilderFactory
      * need the complete set (capability enumeration/diagnostics) - serving this to a request would
      * bypass deny-by-default.
      */
-    public function buildInsecureServer(?RegistryInterface $registry = null): BuiltServer
+    public function buildInsecureServer(?RegistryInterface $registry = null, ?string $instructions = null): BuiltServer
     {
         $registry ??= new Registry(logger: $this->logger);
         $server = $this->create()
             ->setRegistry($registry)
+            ->setInstructions($instructions)
             ->build();
 
         return new BuiltServer($server, $registry);

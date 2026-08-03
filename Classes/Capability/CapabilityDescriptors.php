@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Sitegeist\Pandora\Capability;
 
 use Mcp\Capability\RegistryInterface;
+use Mcp\Schema\ResourceDefinition;
+use Mcp\Schema\ResourceTemplate;
 use Neos\Flow\Annotations as Flow;
 
 /**
@@ -40,12 +42,27 @@ final readonly class CapabilityDescriptors implements \IteratorAggregate, \Count
             $items[] = new CapabilityDescriptor(CapabilityType::Tool, $packageKey, $tool->name, $tool->name);
         }
         foreach ($registry->getResources()->references as $resource) {
-            $packageKey = $packageKeyResolver->resolveForHandler($registry->getResource($resource->uri, false)->handler);
+            if (!$resource instanceof ResourceDefinition) {
+                continue;
+            }
+            $packageKey = $packageKeyResolver->resolveForHandler(
+                $registry->getResource($resource->uri, false)->handler
+            );
             $items[] = new CapabilityDescriptor(CapabilityType::Resource, $packageKey, $resource->name, $resource->uri);
         }
         foreach ($registry->getResourceTemplates()->references as $resourceTemplate) {
-            $packageKey = $packageKeyResolver->resolveForHandler($registry->getResourceTemplate($resourceTemplate->uriTemplate)->handler);
-            $items[] = new CapabilityDescriptor(CapabilityType::ResourceTemplate, $packageKey, $resourceTemplate->name, $resourceTemplate->uriTemplate);
+            if (!$resourceTemplate instanceof ResourceTemplate) {
+                continue;
+            }
+            $packageKey = $packageKeyResolver->resolveForHandler(
+                $registry->getResourceTemplate($resourceTemplate->uriTemplate)->handler
+            );
+            $items[] = new CapabilityDescriptor(
+                CapabilityType::ResourceTemplate,
+                $packageKey,
+                $resourceTemplate->name,
+                $resourceTemplate->uriTemplate
+            );
         }
         foreach ($registry->getPrompts()->references as $prompt) {
             $packageKey = $packageKeyResolver->resolveForHandler($registry->getPrompt($prompt->name)->handler);
@@ -70,7 +87,10 @@ final readonly class CapabilityDescriptors implements \IteratorAggregate, \Count
      */
     public function getMatchers(): array
     {
-        return array_map(static fn (CapabilityDescriptor $descriptor): string => $descriptor->getMatcher(), $this->items);
+        return array_map(
+            static fn (CapabilityDescriptor $descriptor): string => $descriptor->getMatcher(),
+            $this->items
+        );
     }
 
     /**

@@ -31,3 +31,8 @@ Sitegeist\Pandora\McpServerBuilderFactory:
         arguments:
           1:
             value: MCP_Capabilities
+
+Sitegeist\Pandora\Instruction\InstructionsRegistry:
+  arguments:
+    1:
+      setting: 'Sitegeist.Pandora.instructions'

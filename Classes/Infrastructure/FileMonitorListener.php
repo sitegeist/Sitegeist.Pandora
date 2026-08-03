@@ -21,7 +21,10 @@ class FileMonitorListener
     ) {
     }
 
-    public function flushCapabilitiesCacheOnFileChanges($fileMonitorIdentifier, array $changedFiles)
+    /**
+     * @param array<string,mixed> $changedFiles
+     */
+    public function flushCapabilitiesCacheOnFileChanges(string $fileMonitorIdentifier, array $changedFiles): void
     {
         $this->flowCacheManager->getCache('MCP_Capabilities')->flush();
     }
